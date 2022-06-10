@@ -1,9 +1,10 @@
-package com.myapplication.fragments
+package com.myapplication.ui.fragments
 
 import android.os.Bundle
 import android.view.View
 import android.widget.AbsListView
 import android.widget.Toast
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -11,23 +12,24 @@ import androidx.recyclerview.widget.RecyclerView
 import com.myapplication.R
 import com.myapplication.adapters.NewsAdapter
 import com.myapplication.databinding.FragmentBreakingNewsBinding
-import com.myapplication.ui.NewsActivity
-import com.myapplication.ui.NewsViewModel
+import com.myapplication.fragments.ViewBindingFragment
+import com.myapplication.ui.viewModel.BreakingNewsViewModel
 import com.myapplication.util.Constants.Companion.QUERY_PAGE_SIZE
 import com.myapplication.util.Resource
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class BreakingNewsFragment : ViewBindingFragment<FragmentBreakingNewsBinding>
     (FragmentBreakingNewsBinding::inflate) {
 
 
-    lateinit var viewModel: NewsViewModel
+    private val viewModel by viewModels<BreakingNewsViewModel>()
     lateinit var newsAdapter: NewsAdapter
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentBreakingNewsBinding.bind(view)
-        viewModel = (activity as NewsActivity).viewModel
         setupRecyclerView()
 
         newsAdapter.setOnClickListener {
@@ -41,7 +43,7 @@ class BreakingNewsFragment : ViewBindingFragment<FragmentBreakingNewsBinding>
         }
 
         viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
-            when(response) {
+            when (response) {
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
@@ -56,7 +58,8 @@ class BreakingNewsFragment : ViewBindingFragment<FragmentBreakingNewsBinding>
                 is Resource.Error -> {
                     hideProgressBar()
                     response.message?.let { message ->
-                        Toast.makeText(activity, "Произошла ошибка: $message", Toast.LENGTH_LONG).show()
+                        Toast.makeText(activity, "Произошла ошибка: $message", Toast.LENGTH_LONG)
+                            .show()
                     }
                 }
                 is Resource.Loading -> {
@@ -97,14 +100,14 @@ class BreakingNewsFragment : ViewBindingFragment<FragmentBreakingNewsBinding>
             val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isAtNotBeginning &&
                     isTotalMoreThanVisible && isScrolling
             if (shouldPaginate) {
-                viewModel.getBreakingNews("ru")
+                context?.let { viewModel.getBreakingNews(it,"ru") }
                 isScrolling = false
             }
         }
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
-            if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
+            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
                 isScrolling = true
             }
         }
@@ -118,4 +121,5 @@ class BreakingNewsFragment : ViewBindingFragment<FragmentBreakingNewsBinding>
             layoutManager = LinearLayoutManager(activity)
             addOnScrollListener(this@BreakingNewsFragment.scrollListener)
         }
-    }}
+    }
+}

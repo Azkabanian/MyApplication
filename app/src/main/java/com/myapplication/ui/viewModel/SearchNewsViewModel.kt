@@ -1,51 +1,67 @@
-package com.myapplication.ui
+package com.myapplication.ui.viewModel
 
 import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.myapplication.BaseApplication
-import com.myapplication.models.Article
 import com.myapplication.models.NewsResponse
 import com.myapplication.repository.NewsRepository
 import com.myapplication.util.Resource
+import dagger.hilt.android.internal.Contexts.getApplication
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import java.io.IOException
 import javax.inject.Inject
 
-
 @HiltViewModel
-class NewsViewModel @Inject constructor (
-    app: Application,
+class SearchNewsViewModel @Inject constructor(
+    application: Application,
     val newsRepository: NewsRepository
-) : AndroidViewModel(app) {
-
-    val breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
-    var breakingNewsPage = 1
-    var breakingNewsResponse: NewsResponse? = null
+): ViewModel() {
 
     val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var searchNewsPage = 1
     var searchNewsResponse: NewsResponse? = null
 
+    val breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
+    var breakingNewsPage = 1
+    var breakingNewsResponse: NewsResponse? = null
 
     init {
-        getBreakingNews("ru")
+        getBreakingNews(application,"ru")
     }
 
-    fun getBreakingNews(countryCode: String) = viewModelScope.launch {
-        safeBreakingNewsCall(countryCode)
+    fun searchNews(context: Context, searchQuery: String) = viewModelScope.launch {
+        safeSearchNewsCall(context, searchQuery)
+    }
+
+    fun getBreakingNews(context: Context, countryCode: String) = viewModelScope.launch {
+        safeBreakingNewsCall(context, countryCode)
 
     }
 
-    fun searchNews(searchQuery: String) = viewModelScope.launch {
-        safeSearchNewsCall(searchQuery)
+    private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
+        if (response.isSuccessful) {
+            response.body()?.let { resultResponse ->
+                searchNewsPage++
+                if (searchNewsResponse == null) {
+                    searchNewsResponse = resultResponse
+                }
+                else{
+                    val oldArticles = searchNewsResponse?.articles
+                    val newArticles = resultResponse.articles
+                    oldArticles?.addAll(newArticles)
+                }
+                return Resource.Success(searchNewsResponse ?: resultResponse)
+            }
+        }
+        return Resource.Error(response.message())
     }
 
     private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
@@ -66,37 +82,10 @@ class NewsViewModel @Inject constructor (
         return Resource.Error(response.message())
     }
 
-    private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
-                searchNewsPage++
-                if (searchNewsResponse == null) {
-                    searchNewsResponse = resultResponse
-                }
-                else{
-                    val oldArticles = searchNewsResponse?.articles
-                    val newArticles = resultResponse.articles
-                    oldArticles?.addAll(newArticles)
-                }
-                return Resource.Success(searchNewsResponse ?: resultResponse)
-            }
-        }
-        return Resource.Error(response.message())
-    }
-    fun saveArticle(article: Article) = viewModelScope.launch {
-        newsRepository.upsert(article)
-    }
-
-    fun getSavedNews() = newsRepository.getSavedNews()
-
-    fun deleteArticle(article: Article) = viewModelScope.launch {
-        newsRepository.deleteArticle(article)
-    }
-
-    private suspend fun safeSearchNewsCall(searchQuery: String) {
+    private suspend fun safeSearchNewsCall(context: Context, searchQuery: String) {
         searchNews.postValue(Resource.Loading())
         try {
-            if (hasInternetConnection()) {
+            if (hasInternetConnection(context)) {
                 val response = newsRepository.searchNews(searchQuery, searchNewsPage)
                 searchNews.postValue(handleSearchNewsResponse(response))
             } else{
@@ -110,10 +99,10 @@ class NewsViewModel @Inject constructor (
         }
     }
 
-    private suspend fun safeBreakingNewsCall(countryCode: String) {
+    private suspend fun safeBreakingNewsCall(context: Context, countryCode: String) {
         breakingNews.postValue(Resource.Loading())
         try {
-            if (hasInternetConnection()) {
+            if (hasInternetConnection(context)) {
                 val response = newsRepository.getBreakingNews(countryCode, breakingNewsPage)
                 breakingNews.postValue(handleBreakingNewsResponse(response))
             } else{
@@ -127,8 +116,8 @@ class NewsViewModel @Inject constructor (
         }
     }
 
-    private fun hasInternetConnection(): Boolean{
-        val connectivityManager = getApplication<BaseApplication>().getSystemService(
+    private fun hasInternetConnection(context: Context): Boolean{
+        val connectivityManager = getApplication(context).getSystemService(
             Context.CONNECTIVITY_SERVICE
         ) as ConnectivityManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -152,6 +141,4 @@ class NewsViewModel @Inject constructor (
         }
         return false
     }
-
-
 }

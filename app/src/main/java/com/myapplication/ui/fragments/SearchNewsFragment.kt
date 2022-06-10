@@ -1,10 +1,11 @@
-package com.myapplication.fragments
+package com.myapplication.ui.fragments
 
 import android.os.Bundle
 import android.view.View
 import android.widget.AbsListView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,24 +13,28 @@ import androidx.recyclerview.widget.RecyclerView
 import com.myapplication.R
 import com.myapplication.adapters.NewsAdapter
 import com.myapplication.databinding.FragmentSearchNewsBinding
+import com.myapplication.fragments.ViewBindingFragment
 import com.myapplication.ui.*
+import com.myapplication.ui.viewModel.SearchNewsViewModel
 import com.myapplication.util.Constants
 import com.myapplication.util.Constants.Companion.SEARCH_NEWS_TIME_DELAY
 import com.myapplication.util.Resource
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class SearchNewsFragment : ViewBindingFragment<FragmentSearchNewsBinding>(FragmentSearchNewsBinding::inflate) {
+@AndroidEntryPoint
+class SearchNewsFragment :
+    ViewBindingFragment<FragmentSearchNewsBinding>(FragmentSearchNewsBinding::inflate) {
 
 
-    lateinit var viewModel: NewsViewModel
+    private val viewModel by viewModels<SearchNewsViewModel>()
     lateinit var newsAdapter: NewsAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = (activity as NewsActivity).viewModel
         setupRecyclerView()
 
         newsAdapter.setOnClickListener {
@@ -49,15 +54,15 @@ class SearchNewsFragment : ViewBindingFragment<FragmentSearchNewsBinding>(Fragme
                 delay(SEARCH_NEWS_TIME_DELAY)
                 editable?.let {
                     if (editable.toString().isNotEmpty()) {
-                        viewModel.searchNews(editable.toString())
+                        context?.let { it1 -> viewModel.searchNews(it1, editable.toString()) }
                     }
                 }
 
             }
         }
 
-        viewModel.searchNews.observe(viewLifecycleOwner, Observer{ response ->
-            when(response) {
+        viewModel.searchNews.observe(viewLifecycleOwner, Observer { response ->
+            when (response) {
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
@@ -72,7 +77,8 @@ class SearchNewsFragment : ViewBindingFragment<FragmentSearchNewsBinding>(Fragme
                 is Resource.Error -> {
                     hideProgressBar()
                     response.message?.let { message ->
-                        Toast.makeText(activity, "An error occurred: $message", Toast.LENGTH_LONG).show()
+                        Toast.makeText(activity, "An error occurred: $message", Toast.LENGTH_LONG)
+                            .show()
                     }
                 }
                 is Resource.Loading -> {
@@ -114,14 +120,14 @@ class SearchNewsFragment : ViewBindingFragment<FragmentSearchNewsBinding>(Fragme
             val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isAtNotBeginning &&
                     isTotalMoreThanVisible && isScrolling
             if (shouldPaginate) {
-                viewModel.getBreakingNews(binding.etSearch.text.toString())
+                context?.let { viewModel.getBreakingNews(it, binding.etSearch.text.toString()) }
                 isScrolling = false
             }
         }
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
-            if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
+            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
                 isScrolling = true
             }
         }
