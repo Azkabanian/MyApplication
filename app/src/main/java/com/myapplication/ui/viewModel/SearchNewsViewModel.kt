@@ -9,8 +9,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.myapplication.domain.models.NewsResponse
-import com.myapplication.domain.repository.NewsRepository
+import com.myapplication.domain.usecase.GetBreakingNewsUseCase
+import com.myapplication.domain.usecase.SearchNewsUseCase
 import com.myapplication.ui.util.Resource
+import com.myapplication.util.Constants.Companion.BREAKING_NEWS_PAGE
+import com.myapplication.util.Constants.Companion.SEARCH_NEWS_PAGE
 import dagger.hilt.android.internal.Contexts.getApplication
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -21,15 +24,16 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchNewsViewModel @Inject constructor(
     application: Application,
-    val newsRepository: NewsRepository
+    private val searchNewsUseCase: SearchNewsUseCase,
+    private val getBreakingNewsUseCase: GetBreakingNewsUseCase
 ): ViewModel() {
 
     val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
-    var searchNewsPage = 1
+    var searchNewsPage = SEARCH_NEWS_PAGE
     var searchNewsResponse: NewsResponse? = null
 
     val breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
-    var breakingNewsPage = 1
+    var breakingNewsPage = BREAKING_NEWS_PAGE
     var breakingNewsResponse: NewsResponse? = null
 
     init {
@@ -85,7 +89,7 @@ class SearchNewsViewModel @Inject constructor(
         searchNews.postValue(Resource.Loading())
         try {
             if (hasInternetConnection(context)) {
-                val response = newsRepository.searchNews(searchQuery, searchNewsPage)
+                val response = searchNewsUseCase.invoke(searchQuery, searchNewsPage)
                 searchNews.postValue(handleSearchNewsResponse(response))
             } else{
                 searchNews.postValue(Resource.Error("Нет интернет соединения"))
@@ -102,7 +106,7 @@ class SearchNewsViewModel @Inject constructor(
         breakingNews.postValue(Resource.Loading())
         try {
             if (hasInternetConnection(context)) {
-                val response = newsRepository.getBreakingNews(countryCode, breakingNewsPage)
+                val response = getBreakingNewsUseCase.invoke(countryCode, breakingNewsPage)
                 breakingNews.postValue(handleBreakingNewsResponse(response))
             } else{
                 breakingNews.postValue(Resource.Error("Нет интернет соединения"))

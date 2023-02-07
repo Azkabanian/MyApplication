@@ -9,7 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.myapplication.domain.models.NewsResponse
-import com.myapplication.domain.repository.NewsRepository
+import com.myapplication.domain.usecase.GetBreakingNewsUseCase
 import com.myapplication.ui.util.Resource
 import dagger.hilt.android.internal.Contexts.getApplication
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BreakingNewsViewModel @Inject constructor(
     application: Application,
-    val newsRepository: NewsRepository
+    private val getBreakingNewsUseCase: GetBreakingNewsUseCase
 ): ViewModel() {
 
     val breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
@@ -59,7 +59,7 @@ class BreakingNewsViewModel @Inject constructor(
         breakingNews.postValue(Resource.Loading())
         try {
             if (hasInternetConnection(context)) {
-                val response = newsRepository.getBreakingNews(countryCode, breakingNewsPage)
+                val response = getBreakingNewsUseCase.invoke(countryCode, breakingNewsPage)
                 breakingNews.postValue(handleBreakingNewsResponse(response))
             } else{
                 breakingNews.postValue(Resource.Error("Нет интернет соединения"))
