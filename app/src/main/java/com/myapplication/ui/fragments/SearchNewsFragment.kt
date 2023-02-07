@@ -6,19 +6,17 @@ import android.widget.AbsListView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.myapplication.R
-import com.myapplication.adapters.NewsAdapter
 import com.myapplication.databinding.FragmentSearchNewsBinding
 import com.myapplication.fragments.ViewBindingFragment
-import com.myapplication.ui.*
+import com.myapplication.ui.adapters.NewsAdapter
+import com.myapplication.ui.util.Resource
 import com.myapplication.ui.viewModel.SearchNewsViewModel
 import com.myapplication.util.Constants
 import com.myapplication.util.Constants.Companion.SEARCH_NEWS_TIME_DELAY
-import com.myapplication.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -61,7 +59,7 @@ class SearchNewsFragment :
             }
         }
 
-        viewModel.searchNews.observe(viewLifecycleOwner, Observer { response ->
+        viewModel.searchNews.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Resource.Success -> {
                     hideProgressBar()
@@ -85,7 +83,7 @@ class SearchNewsFragment :
                     showProgressBar()
                 }
             }
-        })
+        }
 
     }
 

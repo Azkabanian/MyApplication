@@ -1,4 +1,4 @@
-package com.myapplication.util
+package com.myapplication.ui.util
 
 sealed class Resource<T>(val data: T? = null, val message: String? = null) {
 

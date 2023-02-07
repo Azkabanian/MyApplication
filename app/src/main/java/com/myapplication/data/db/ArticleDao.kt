@@ -1,8 +1,8 @@
-package com.myapplication.db
+package com.myapplication.data.db
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.myapplication.models.Article
+import com.myapplication.domain.models.Article
 
 @Dao
 interface ArticleDao {

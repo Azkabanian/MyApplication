@@ -5,17 +5,16 @@ import android.view.View
 import android.widget.AbsListView
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.myapplication.R
-import com.myapplication.adapters.NewsAdapter
 import com.myapplication.databinding.FragmentBreakingNewsBinding
 import com.myapplication.fragments.ViewBindingFragment
+import com.myapplication.ui.adapters.NewsAdapter
+import com.myapplication.ui.util.Resource
 import com.myapplication.ui.viewModel.BreakingNewsViewModel
 import com.myapplication.util.Constants.Companion.QUERY_PAGE_SIZE
-import com.myapplication.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -42,7 +41,7 @@ class BreakingNewsFragment : ViewBindingFragment<FragmentBreakingNewsBinding>
             )
         }
 
-        viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
+        viewModel.breakingNews.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Resource.Success -> {
                     hideProgressBar()
@@ -66,7 +65,7 @@ class BreakingNewsFragment : ViewBindingFragment<FragmentBreakingNewsBinding>
                     showProgressBar()
                 }
             }
-        })
+        }
     }
 
     private fun hideProgressBar() {
