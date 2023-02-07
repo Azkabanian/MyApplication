@@ -5,16 +5,15 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.myapplication.BaseApplication
-import com.myapplication.models.NewsResponse
-import com.myapplication.repository.NewsRepository
-import com.myapplication.util.Resource
+import com.myapplication.domain.models.NewsResponse
+import com.myapplication.domain.repository.NewsRepository
+import com.myapplication.ui.util.Resource
 import dagger.hilt.android.internal.Contexts.getApplication
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import java.io.IOException
@@ -34,7 +33,7 @@ class BreakingNewsViewModel @Inject constructor(
         getBreakingNews(application,"ru")
     }
 
-    fun getBreakingNews(context: Context, countryCode: String) = viewModelScope.launch {
+    fun getBreakingNews(context: Context, countryCode: String) = viewModelScope.launch(Dispatchers.IO) {
         safeBreakingNewsCall(context, countryCode)
 
     }
@@ -51,7 +50,6 @@ class BreakingNewsViewModel @Inject constructor(
                     oldArticles?.addAll(newArticles)
                 }
                 return Resource.Success(breakingNewsResponse ?: resultResponse)
-
             }
         }
         return Resource.Error(response.message())

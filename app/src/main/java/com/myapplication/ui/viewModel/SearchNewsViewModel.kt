@@ -8,10 +8,9 @@ import android.os.Build
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.myapplication.BaseApplication
-import com.myapplication.models.NewsResponse
-import com.myapplication.repository.NewsRepository
-import com.myapplication.util.Resource
+import com.myapplication.domain.models.NewsResponse
+import com.myapplication.domain.repository.NewsRepository
+import com.myapplication.ui.util.Resource
 import dagger.hilt.android.internal.Contexts.getApplication
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

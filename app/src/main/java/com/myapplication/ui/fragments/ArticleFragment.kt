@@ -1,4 +1,4 @@
-package com.myapplication.fragments
+package com.myapplication.ui.fragments
 
 import android.os.Bundle
 import android.view.View
@@ -7,6 +7,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
 import com.myapplication.databinding.FragmentArticleBinding
+import com.myapplication.fragments.ViewBindingFragment
 import com.myapplication.ui.viewModel.ArticleViewModel
 import dagger.hilt.android.AndroidEntryPoint
 

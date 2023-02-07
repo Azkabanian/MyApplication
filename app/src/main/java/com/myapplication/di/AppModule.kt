@@ -2,17 +2,14 @@ package com.myapplication.di
 
 import android.app.Application
 import androidx.room.Room
-import com.myapplication.api.NewsAPI
-import com.myapplication.db.ArticleDatabase
-import com.myapplication.repository.NewsRepository
+import com.myapplication.data.api.NewsAPI
+import com.myapplication.data.db.ArticleDatabase
 import com.myapplication.util.Constants.Companion.ARTICLE_DATABASE_NAME
 import com.myapplication.util.Constants.Companion.BASE_URL
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton

@@ -3,16 +3,15 @@ package com.myapplication.ui.fragments
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.myapplication.R
-import com.myapplication.adapters.NewsAdapter
 import com.myapplication.databinding.FragmentSavedNewsBinding
 import com.myapplication.fragments.ViewBindingFragment
+import com.myapplication.ui.adapters.NewsAdapter
 import com.myapplication.ui.viewModel.SavedNewsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -38,7 +37,6 @@ class SavedNewsFragment : ViewBindingFragment<FragmentSavedNewsBinding>(Fragment
             )
         }
 
-        //Анонимный класс
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,
             ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
@@ -68,9 +66,9 @@ class SavedNewsFragment : ViewBindingFragment<FragmentSavedNewsBinding>(Fragment
             attachToRecyclerView(binding.rvSavedNews)
         }
 
-        viewModel.getSavedNews().observe(viewLifecycleOwner, Observer { articles ->
+        viewModel.getSavedNews().observe(viewLifecycleOwner) { articles ->
             newsAdapter.differ.submitList(articles)
-        })
+        }
     }
 
     private fun setupRecyclerView() {

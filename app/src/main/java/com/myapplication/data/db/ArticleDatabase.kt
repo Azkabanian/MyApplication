@@ -1,11 +1,9 @@
-package com.myapplication.db
+package com.myapplication.data.db
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.myapplication.models.Article
+import com.myapplication.domain.models.Article
 
 @Database(
     entities = [Article::class],

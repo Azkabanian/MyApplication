@@ -1,6 +1,6 @@
-package com.myapplication.api
+package com.myapplication.data.api
 
-import com.myapplication.models.NewsResponse
+import com.myapplication.domain.models.NewsResponse
 import com.myapplication.util.Constants.Companion.API_KEY
 import retrofit2.Response
 import retrofit2.http.GET

@@ -1,8 +1,8 @@
-package com.myapplication.repository
+package com.myapplication.domain.repository
 
-import com.myapplication.api.NewsAPI
-import com.myapplication.db.ArticleDao
-import com.myapplication.models.Article
+import com.myapplication.data.api.NewsAPI
+import com.myapplication.data.db.ArticleDao
+import com.myapplication.domain.models.Article
 import javax.inject.Inject
 
 class NewsRepository @Inject constructor (
